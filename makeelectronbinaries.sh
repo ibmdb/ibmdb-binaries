@@ -27,6 +27,7 @@ MAJOR_VER=37
 NODEWORK=$(dirname $(dirname $(dirname `which node`)))
 echo "Installed node = $INSTALLED_NODE_V"
 export IBM_DB_HOME=
+export DOWNLOAD_CLIDRIVER=true
 
 CREATE_BINARY="true"
 FORCE_BINARY=false
@@ -58,6 +59,7 @@ function getLatestElectronVersion {
     echo "Fetching the latest Electron v${MAJOR_VER}.x versions..."
 
     # Fetch release info and extract matching versions
+    #version=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/electron/electron/releases?per_page=100" \
     version=$(curl -s "https://api.github.com/repos/electron/electron/releases?per_page=100" \
       | grep '"tag_name":' \
       | grep -E "\"v${MAJOR_VER}\.[0-9]+\.[0-9]+"\" \
@@ -203,9 +205,9 @@ for ver in 32 33 34 35 36 37 38; do
 
   if $versionFound; then
     checkForNewVersion
-  fi
-  if [[ "$CREATE_BINARY" == "true" ]]; then
-    createBinary
+    if [[ "$CREATE_BINARY" == "true" ]]; then
+      createBinary
+    fi
   fi
 done
 ls -l "$CURR_DIR/$OSDIR"
