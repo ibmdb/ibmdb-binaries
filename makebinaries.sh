@@ -22,9 +22,16 @@ arch=`uname -m`
 INSTALLED_NODE_V=`node -v`
 LATEST_VERSION=""
 downloaded=false
-NODEV=24
+MAJOR_VER=24
 NODEWORK=$(dirname $(dirname $(dirname `which node`)))
 echo "Installed node = $INSTALLED_NODE_V"
+export IBM_DB_HOME=
+
+CREATE_BINARY="true"
+FORCE_BINARY=false
+if [[ "$1" == "force" ]]; then
+  FORCE_BINARY=true
+fi
 
 ARCHIVE_PATTERN="linux-x64.tar.gz"
 PLAT="linuxx64"
@@ -45,9 +52,9 @@ else
 fi
 
 function downloadLatestNodejs {
-  BASE_URL="https://nodejs.org/download/release/latest-v$NODEV.x/"
+  BASE_URL="https://nodejs.org/download/release/latest-v$MAJOR_VER.x/"
   # Get latest version filename
-  TARBALL=$(curl -s "$BASE_URL" | grep -Eo "node-v$NODEV\.[0-9]+\.[0-9]+-$ARCHIVE_PATTERN" | head -n 1)
+  TARBALL=$(curl -s "$BASE_URL" | grep -Eo "node-v$MAJOR_VER\.[0-9]+\.[0-9]+-$ARCHIVE_PATTERN" | head -n 1)
   UNTAR_NAME="${TARBALL:0:$((${#TARBALL} - 7))}"
   downloaded=false
 
@@ -57,16 +64,18 @@ function downloadLatestNodejs {
   fi
 
   # Extract version string from filename
-  LATEST_VERSION=$(echo "$TARBALL" | sed -E "s/node-(v$NODEV\.[0-9]+\.[0-9]+).*/\1/")
+  LATEST_VERSION=$(echo "$TARBALL" | sed -E "s/node-(v$MAJOR_VER\.[0-9]+\.[0-9]+).*/\1/")
   NODEDIR_NAME="$NODEWORK/node$LATEST_VERSION"
 
   # Check if we already have this version
   if [[ "$LATEST_VERSION" == "$INSTALLED_NODE_V" ]]; then
     echo "No new version found. Latest version ($LATEST_VERSION) already installed."
+    downloaded=true
     return 0
   fi
   if [[ -d "$NODEDIR_NAME" ]]; then
     echo "No new version found. Latest version ($LATEST_VERSION) already exist."
+    downloaded=true
     return 0
   fi
 
@@ -97,28 +106,90 @@ function downloadLatestNodejs {
 }
 
 function createBinary {
-    if command -v $cmd &> /dev/null; then
+    if command -v node &> /dev/null; then
         NODEVER=`node -v`
         mv "$NODEWORK/nodejs" "$NODEWORK/node$NODEVER"
     else
         echo "Unable to find installed nodejs version."
-        return 1
     fi
     mv "$NODEWORK/node$LATEST_VERSION" "$NODEWORK/nodejs"
-    NODEVER=`node -v`
-    echo "Using node of version $NODEVER"
     cd $IBMDB_DIR
     npm install
     if [ ! -d "$CURR_DIR/$PLAT" ]; then
         mkdir "$CURR_DIR/$PLAT"
     fi
     if [ -f "$IBMDB_DIR/build/Release/odbc_bindings.node" ]; then
-      cp "$IBMDB_DIR/build/Release/odbc_bindings.node" "$CURR_DIR/$PLAT/odbc_bindings.node.$NODEV"
-      echo "Coppied $CURR_DIR/$PLAT/odbc_bindings.node.$NODEV for $NODEVER"
+      cp "$IBMDB_DIR/build/Release/odbc_bindings.node" "$CURR_DIR/$PLAT/odbc_bindings.node.$MAJOR_VER"
+      echo "Coppied $CURR_DIR/$PLAT/odbc_bindings.node.$MAJOR_VER for $LATEST_VERSION"
       echo ""
       updateReadmeFile
+      updateVersionFile
     fi
     cd $CURR_DIR
+}
+
+function checkLatestVersionInFile {
+    README="$CURR_DIR/binaryVersions.txt"
+    CREATE_BINARY="true"
+    if [[ ! -f "$README" ]]; then
+      echo "Error: File '$README' not found."
+      exit 1
+    fi
+
+    PATTERN="${osname} ${arch} Node ${MAJOR_VER} Version = "
+    REGEX_PATTERN="^${PATTERN}"
+    MATCHING_LINE=$(grep -E "$REGEX_PATTERN" "$README")
+
+    if [[ -n "$MATCHING_LINE" ]]; then
+      # Extract current version from version file
+      CURRENT_VERSION=$(echo "$MATCHING_LINE" | sed -E "s/$REGEX_PATTERN//")
+
+      if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
+        echo "Node version $CURRENT_VERSION is present in version file."
+        CREATE_BINARY="false"
+      fi
+    fi
+
+    # Check if force option is used
+    if $FORCE_BINARY; then
+      CREATE_BINARY="true"
+    fi
+
+    # Check for binary file
+    if [[ "$CREATE_BINARY" == "false" && ! -e "$CURR_DIR/$PLAT/odbc_bindings.node.$MAJOR_VER" ]]; then
+      CREATE_BINARY="true"
+    fi
+}
+
+function updateVersionFile {
+    README="$CURR_DIR/binaryVersions.txt"
+    if [[ ! -f "$README" ]]; then
+      echo "Error: File '$README' not found."
+      exit 1
+    fi
+
+    PATTERN="${osname} ${arch} Node ${MAJOR_VER} Version = "
+    REGEX_PATTERN="^${PATTERN}"
+    MATCHING_LINE=$(grep -E "$REGEX_PATTERN" "$README")
+
+    if [[ -n "$MATCHING_LINE" ]]; then
+      # Extract current version from version file
+      CURRENT_VERSION=$(echo "$MATCHING_LINE" | sed -E "s/$REGEX_PATTERN//")
+
+      if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
+        return 0
+      fi
+
+      # Replace existing line
+      TMP_FILE=$(mktemp)
+      sed -E "s/$REGEX_PATTERN.*/${PATTERN}${LATEST_VERSION}/" "$README" > "$TMP_FILE"
+      mv "$TMP_FILE" "$README"
+      echo "Updated Node $MAJOR_VER Version from $CURRENT_VERSION to $LATEST_VERSION in version file"
+    else
+      # Add new line at the end
+      echo "${PATTERN}${LATEST_VERSION}" >> "$README"
+      echo "Added new line: ${PATTERN}${LATEST_VERSION} to version file"
+    fi
 }
 
 function updateReadmeFile {
@@ -129,42 +200,45 @@ function updateReadmeFile {
     fi
 
     # Escape asterisk for grep/sed use
-    REGEX_PATTERN="^\* Node ${NODEV} Version = "
-    PATTERN="* Node ${NODEV} Version = "
-    NEW_VERSION=`node -v`
+    REGEX_PATTERN="^\* Node ${MAJOR_VER} Version = "
+    PATTERN="* Node ${MAJOR_VER} Version = "
     MATCHING_LINE=$(grep -E "$REGEX_PATTERN" "$README")
 
     if [[ -n "$MATCHING_LINE" ]]; then
       # Extract current version from readme file
       CURRENT_VERSION=$(echo "$MATCHING_LINE" | sed -E "s/$REGEX_PATTERN//")
 
-      if [[ "$CURRENT_VERSION" == "$NEW_VERSION" ]]; then
-        echo "Node $NODEV Version is already $NEW_VERSION. No update needed."
+      if [[ "$CURRENT_VERSION" == "$LATEST_VERSION" ]]; then
+        echo "Node $MAJOR_VER Version is already $LATEST_VERSION. No update needed."
         return 0
       fi
 
       # Replace existing line
       TMP_FILE=$(mktemp)
-      sed -E "s/$REGEX_PATTERN.*/${PATTERN}${NEW_VERSION}/" "$README" > "$TMP_FILE"
+      sed -E "s/$REGEX_PATTERN.*/${PATTERN}${LATEST_VERSION}/" "$README" > "$TMP_FILE"
       mv "$TMP_FILE" "$README"
-      echo "Updated Node $NODEV Version from $CURRENT_VERSION to $NEW_VERSION in Readme.md file"
+      echo "Updated Node $MAJOR_VER Version from $CURRENT_VERSION to $LATEST_VERSION in Readme.md file"
     else
       # Add new line at the end
-      echo "${PATTERN}${NEW_VERSION}" >> "$README"
-      echo "Added new line: ${PATTERN}${NEW_VERSION} to Readme.md file"
+      echo "${PATTERN}${LATEST_VERSION}" >> "$README"
+      echo "Added new line: ${PATTERN}${LATEST_VERSION} to Readme.md file"
     fi
 }
 
 for ver in 16 17 18 19 20 21 22 23 24; do
-  NODEV=$ver
+  MAJOR_VER=$ver
   downloadLatestNodejs
-  if [[ $? -eq 0 && ! -e "$CURR_DIR/$PLAT/odbc_bindings.node.$NODEV" ]]; then
-    downloaded=true
-  fi
   if $downloaded; then
-    createBinary
+    checkLatestVersionInFile
+    if [[ "$CREATE_BINARY" == "true" ]]; then
+      createBinary
+    fi
   fi
 done
-ls -l "$CURR_DIR/$PLAT"
+# Create Electron binaries too
+./makeelectronbinaries.sh
+
+#ls -l "$CURR_DIR/$PLAT"
+git status
 echo "Done!"
 
