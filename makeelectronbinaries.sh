@@ -27,7 +27,6 @@ MAJOR_VER=37
 NODEWORK=$(dirname $(dirname $(dirname `which node`)))
 echo "Installed node = $INSTALLED_NODE_V"
 export IBM_DB_HOME=
-export DOWNLOAD_CLIDRIVER=true
 
 CREATE_BINARY="true"
 FORCE_BINARY=false
