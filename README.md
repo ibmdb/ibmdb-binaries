@@ -20,6 +20,6 @@ Repo for precompiled native binaries for c/cpp code of open source drivers
 * Electron 32 Version = 32.3.3
 * Electron 33 Version = 33.4.11
 * Electron 34 Version = 34.5.8
-* Electron 35 Version = 35.6.0
-* Electron 36 Version = 36.6.0
-* Electron 37 Version = 37.1.0
+* Electron 35 Version = 35.7.0
+* Electron 36 Version = 36.7.1
+* Electron 37 Version = 37.2.1
