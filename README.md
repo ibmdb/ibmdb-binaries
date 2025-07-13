@@ -13,7 +13,7 @@ Repo for precompiled native binaries for c/cpp code of open source drivers
 * Node 21 Version = v21.7.3
 * Node 22 Version = v22.17.0
 * Node 23 Version = v23.11.1
-* Node 24 Version = v24.3.0
+* Node 24 Version = v24.4.0
 
 ## Electron versions used to generate binary file
 

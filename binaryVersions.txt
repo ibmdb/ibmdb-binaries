@@ -16,7 +16,7 @@ Darwin arm64 Node 20 Version = v20.19.3
 Darwin arm64 Node 21 Version = v21.7.3
 Darwin arm64 Node 22 Version = v22.17.0
 Darwin arm64 Node 23 Version = v23.11.1
-Darwin arm64 Node 24 Version = v24.3.0
+Darwin arm64 Node 24 Version = v24.4.0
 
 Darwin x86_64 Node 16 Version = v16.20.2
 Darwin x86_64 Node 17 Version = v17.9.1
@@ -38,9 +38,9 @@ Linux x86_64 Electron 37 Version = 37.1.0
 Darwin arm64 Electron 32 Version = 32.3.3
 Darwin arm64 Electron 33 Version = 33.4.11
 Darwin arm64 Electron 34 Version = 34.5.8
-Darwin arm64 Electron 35 Version = 35.6.0
-Darwin arm64 Electron 36 Version = 36.6.0
-Darwin arm64 Electron 37 Version = 37.1.0
+Darwin arm64 Electron 35 Version = 35.7.0
+Darwin arm64 Electron 36 Version = 36.7.1
+Darwin arm64 Electron 37 Version = 37.2.1
 
 Darwin x86_64 Electron 32 Version = 32.3.3
 Darwin x86_64 Electron 33 Version = 33.4.11
