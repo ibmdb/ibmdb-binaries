@@ -24,9 +24,9 @@ Darwin x86_64 Node 18 Version = v18.20.8
 Darwin x86_64 Node 19 Version = v19.9.0
 Darwin x86_64 Node 20 Version = v20.19.5
 Darwin x86_64 Node 21 Version = v21.7.3
-Darwin x86_64 Node 22 Version = v22.19.0
+Darwin x86_64 Node 22 Version = v22.20.0
 Darwin x86_64 Node 23 Version = v23.11.1
-Darwin x86_64 Node 24 Version = v24.7.0
+Darwin x86_64 Node 24 Version = v24.9.0
 
 Linux x86_64 Electron 32 Version = 32.3.3
 Linux x86_64 Electron 33 Version = 33.4.11
@@ -48,7 +48,7 @@ Darwin x86_64 Electron 32 Version = 32.3.3
 Darwin x86_64 Electron 33 Version = 33.4.11
 Darwin x86_64 Electron 34 Version = 34.5.8
 Darwin x86_64 Electron 35 Version = 35.7.5
-Darwin x86_64 Electron 36 Version = 36.8.1
-Darwin x86_64 Electron 37 Version = 37.4.0
-Darwin x86_64 Electron 38 Version = 38.0.0
+Darwin x86_64 Electron 36 Version = 36.9.3
+Darwin x86_64 Electron 37 Version = 37.6.0
+Darwin x86_64 Electron 38 Version = 38.2.1
 
