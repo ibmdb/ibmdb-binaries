@@ -11,8 +11,8 @@ Repo for precompiled native binaries for c/cpp code of open source drivers
 * Node 21 Version = v21.7.3
 * Node 22 Version = v22.22.0
 * Node 23 Version = v23.11.1
-* Node 24 Version = v24.13.0
-* Node 25 Version = v25.5.0
+* Node 24 Version = v24.13.1
+* Node 25 Version = v25.6.1
 ## Electron versions used to generate binary file
 * Electron 32 Version = 32.3.3
 * Electron 33 Version = 33.4.11
@@ -20,5 +20,5 @@ Repo for precompiled native binaries for c/cpp code of open source drivers
 * Electron 35 Version = 35.7.5
 * Electron 36 Version = 36.9.5
 * Electron 37 Version = 37.10.3
-* Electron 38 Version = 38.7.2
-* Electron 39 Version = 39.4.0
+* Electron 38 Version = 38.8.1
+* Electron 39 Version = 39.5.2
