@@ -32,8 +32,6 @@ set "MAJOR_VER=24"
 for %%I in ("%~dp0..\..") do set "NODEWORK=%%~fI"
 echo Installed node = !INSTALLED_NODE_V!
 echo NODEWORK = !NODEWORK!
-set "IBM_DB_HOME="
-set "DOWNLOAD_CLIDRIVER=true"
 
 set "CREATE_BINARY=true"
 set "FORCE_BINARY=false"
@@ -275,8 +273,8 @@ if not "!MATCHING_LINE!"=="" (
 exit /b 0
 
 :main
-REM Loop through Node versions 16 to 25
-for %%v in (16 17 18 19 20 21 22 23 24 25) do (
+REM Loop through Node versions 20 to 25
+for %%v in (20 21 22 23 24 25) do (
     set "MAJOR_VER=%%v"
     call :downloadLatestNodejs
     if "!downloaded!"=="true" (

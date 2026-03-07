@@ -33,7 +33,6 @@ set "LATEST_VER=37.1.0"
 set "MAJOR_VER=37"
 for %%I in ("%~dp0..\..") do set "NODEWORK=%%~fI"
 echo Installed node = !INSTALLED_NODE_V!
-set "IBM_DB_HOME="
 
 set "CREATE_BINARY=true"
 set "FORCE_BINARY=false"
@@ -238,8 +237,8 @@ if not "!MATCHING_LINE!"=="" (
 exit /b 0
 
 :main
-REM Loop through Electron versions 32 to 40
-for %%v in (32 33 34 35 36 37 38 39 40) do (
+REM Loop through Electron versions 37 to 41
+for %%v in (37 38 39 40 41) do (
     set "MAJOR_VER=%%v"
     call :getLatestElectronVersion
     
