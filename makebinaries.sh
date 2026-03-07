@@ -122,6 +122,7 @@ function createBinary {
     if [ -f "$IBMDB_DIR/build/Release/odbc_bindings.node" ]; then
       cp "$IBMDB_DIR/build/Release/odbc_bindings.node" "$CURR_DIR/$PLAT/odbc_bindings.node.$MAJOR_VER"
       echo "Coppied $CURR_DIR/$PLAT/odbc_bindings.node.$MAJOR_VER for $LATEST_VERSION"
+      node $IBMDB_DIR/test/test-basic-test.js
       echo ""
       updateReadmeFile
       updateVersionFile
