@@ -238,7 +238,7 @@ exit /b 0
 
 :main
 REM Loop through Electron versions 37 to 41
-for %%v in (37 38 39 40 41) do (
+for %%v in (38 39 40 41 42) do (
     set "MAJOR_VER=%%v"
     call :getLatestElectronVersion
     

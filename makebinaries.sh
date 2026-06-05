@@ -227,7 +227,7 @@ function updateReadmeFile {
     fi
 }
 
-for ver in 20 21 22 23 24 25; do
+for ver in 20 21 22 23 24 25 26; do
   MAJOR_VER=$ver
   downloadLatestNodejs
   if $downloaded; then

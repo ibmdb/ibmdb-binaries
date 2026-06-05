@@ -198,7 +198,7 @@ function updateReadmeFile {
     fi
 }
 
-for ver in 37 38 39 40 41; do
+for ver in 38 39 40 41 42; do
   MAJOR_VER=$ver
   getLatestElectronVersion
 

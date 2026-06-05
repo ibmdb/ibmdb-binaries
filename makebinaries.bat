@@ -274,7 +274,7 @@ exit /b 0
 
 :main
 REM Loop through Node versions 20 to 25
-for %%v in (20 21 22 23 24 25) do (
+for %%v in (20 21 22 23 24 25 26) do (
     set "MAJOR_VER=%%v"
     call :downloadLatestNodejs
     if "!downloaded!"=="true" (
