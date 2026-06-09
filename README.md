@@ -25,4 +25,4 @@ Repo for precompiled native binaries for c/cpp code of open source drivers
 * Electron 39 Version = 39.8.10
 * Electron 40 Version = 40.10.2
 * Electron 41 Version = 41.7.1
-* Electron 42 Version = 42.3.3
+* Electron 42 Version = 42.4.0
