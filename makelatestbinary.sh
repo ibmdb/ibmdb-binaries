@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Build the NAPI ibm_db binary with the latest Node.js for the current non-Windows platform.
 # Usage: ./makelatestbinary.sh [force]
+# Only POSIX options of grep/sed/tar are used so that it also works with AIX native tools.
 
 CURR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IBMDB_DIR="$(dirname "$CURR_DIR")/ibm_db"
@@ -13,15 +14,50 @@ if [[ ! -e "$IBMDB_DIR/installer/driverInstall.js" ]]; then
   exit 1
 fi
 
-for cmd in curl grep sed tar uname; do
-  if ! command -v $cmd &> /dev/null; then
-    echo "Required command '$cmd' not found. Please install it."
-    exit 1
-  fi
-done
-
 osname=$(uname)
 arch=$(uname -m)
+# AIX reports the hardware id in uname -m.
+[[ "$osname" == "AIX" ]] && arch="ppc64"
+
+installHint() {
+  case "$osname" in
+    AIX)
+      echo "  Install with AIX Toolbox (https://www.ibm.com/support/pages/aix-toolbox-open-source-software-overview):"
+      echo "    yum install -y $1   (or: dnf install -y $1)" ;;
+    Darwin)
+      echo "  Install with: brew install $1" ;;
+    *)
+      echo "  Install with one of:"
+      echo "    sudo yum install -y $1 | sudo dnf install -y $1 | sudo apt-get install -y $1 | sudo zypper install -y $1" ;;
+  esac
+}
+
+MISSING=false
+for cmd in curl gunzip tar grep sed awk make git; do
+  if ! command -v $cmd &> /dev/null; then
+    pkg=$cmd
+    [[ "$cmd" == "gunzip" ]] && pkg="gzip"
+    echo "Required command '$cmd' not found."
+    installHint "$pkg"
+    MISSING=true
+  fi
+done
+if [[ "$osname" == "AIX" ]] && ! command -v gmake &> /dev/null; then
+  echo "Required command 'gmake' not found (needed by node-gyp on AIX)."
+  installHint "make"
+  MISSING=true
+fi
+if ! command -v python3 &> /dev/null; then
+  echo "Required command 'python3' not found (needed by node-gyp)."
+  installHint "python3"
+  MISSING=true
+fi
+if ! command -v g++ &> /dev/null && ! command -v c++ &> /dev/null && ! command -v xlC_r &> /dev/null; then
+  echo "A C++ compiler was not found (needed by node-gyp)."
+  installHint "gcc-c++"
+  MISSING=true
+fi
+$MISSING && exit 1
 ARCHIVE_PATTERN=""
 BINARY_NAME=""
 case "$osname" in
@@ -58,12 +94,12 @@ fi
 
 # Find the latest Node.js release
 BASE_URL="https://nodejs.org/download/release/latest/"
-TARBALL=$(curl -fs "$BASE_URL" | grep -Eo "node-v[0-9]+\.[0-9]+\.[0-9]+-$ARCHIVE_PATTERN" | head -n 1)
+TARBALL=$(curl -fs "$BASE_URL" | sed -n "s/.*\(node-v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*-$ARCHIVE_PATTERN\).*/\1/p" | head -n 1)
 if [[ -z "$TARBALL" ]]; then
   echo "Failed to detect latest Node.js version."
   exit 1
 fi
-LATEST_VERSION=$(echo "$TARBALL" | sed -E "s/node-(v[0-9]+\.[0-9]+\.[0-9]+)-.*/\1/")
+LATEST_VERSION=$(echo "$TARBALL" | sed "s/^node-\(v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)-.*/\1/")
 NODEDIR="$NODEWORK/node$LATEST_VERSION"
 echo "Latest Node.js = $LATEST_VERSION"
 
@@ -79,7 +115,7 @@ else
     echo "Download failed!"
     exit 1
   fi
-  tar xzf "$TARBALL" || exit 1
+  gunzip -c "$TARBALL" | tar xf - || exit 1
   mv "${TARBALL%.tar.gz}" "$NODEDIR"
   rm -f "$TARBALL"
   cd "$CURR_DIR" || exit 1
@@ -135,7 +171,10 @@ echo ""
 
 if [[ -f "$VERSION_FILE" ]]; then
   if grep -q "^${PATTERN}" "$VERSION_FILE"; then
-    sed -i.bak -E "s/^${PATTERN}.*/${PATTERN}${LATEST_VERSION}/" "$VERSION_FILE" && rm -f "$VERSION_FILE.bak"
+    TMP_FILE=$(mktemp)
+    awk -v p="$PATTERN" -v v="$LATEST_VERSION" 'index($0, p) == 1 { print p v; next } { print }' "$VERSION_FILE" > "$TMP_FILE" \
+      && cat "$TMP_FILE" > "$VERSION_FILE"
+    rm -f "$TMP_FILE"
   else
     echo "${PATTERN}${LATEST_VERSION}" >> "$VERSION_FILE"
   fi
