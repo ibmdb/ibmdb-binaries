@@ -84,3 +84,5 @@ Darwin x86_64 Electron 39 Version = 39.8.10
 Darwin x86_64 Electron 40 Version = 40.10.2
 Darwin x86_64 Electron 41 Version = 41.7.1
 Darwin x86_64 Electron 42 Version = 42.4.0
+
+Linux x86_64 NAPI Node Version = v26.12.0
