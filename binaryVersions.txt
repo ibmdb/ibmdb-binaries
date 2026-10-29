@@ -88,6 +88,6 @@ Darwin x86_64 Electron 42 Version = 42.4.0
 Linux x86_64 NAPI Node Version = v26.13.0
 Darwin arm64 NAPI Node Version = v26.12.0
 Darwin x86_64 NAPI Node Version = v26.12.0
-Windows x86_64 NAPI Node Version = v26.12.0
+Windows x86_64 NAPI Node Version = v26.13.0
 AIX ppc64 NAPI Node Version = v22.19.0
 zLinux s390 NAPI Node Version = v22.19.0
