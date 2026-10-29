@@ -6,6 +6,28 @@
 CURR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IBMDB_DIR="$(dirname "$CURR_DIR")/ibm_db"
 NODEWORK="$(dirname "$(dirname "$CURR_DIR")")"
+NODE_COMMAND="$(command -v node 2>/dev/null || true)"
+if [[ -n "$NODE_COMMAND" ]] && node -v >/dev/null 2>&1; then
+  NODE_BIN_DIR="$(dirname "$NODE_COMMAND")"
+  if [[ "$(basename "$NODE_BIN_DIR")" == "bin" ]]; then
+    NODEJS_DIR="$(dirname "$NODE_BIN_DIR")"
+  else
+    NODEJS_DIR="$NODE_BIN_DIR"
+  fi
+  if [[ "$(basename "$NODEJS_DIR")" != "nodejs" ]]; then
+    RESOLVED_NODE="$(readlink -f "$NODE_COMMAND" 2>/dev/null || printf '%s' "$NODE_COMMAND")"
+    NODE_BIN_DIR="$(dirname "$RESOLVED_NODE")"
+    if [[ "$(basename "$NODE_BIN_DIR")" == "bin" ]]; then
+      NODEJS_DIR="$(dirname "$NODE_BIN_DIR")"
+    else
+      NODEJS_DIR="$NODE_BIN_DIR"
+    fi
+  fi
+  if [[ "$(basename "$NODEJS_DIR")" == "nodejs" ]]; then
+    NODEWORK="$(dirname "$NODEJS_DIR")"
+  fi
+fi
+echo "Node work directory = $NODEWORK"
 FORCE_BINARY=false
 [[ "$1" == "force" ]] && FORCE_BINARY=true
 
@@ -77,6 +99,9 @@ case "$osname" in
     if [[ "$arch" == "x86_64" ]]; then
       ARCHIVE_PATTERN="linux-x64.tar.gz"
       BINARY_NAME="odbc_bindings_linux.node"
+    elif [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
+      ARCHIVE_PATTERN="linux-arm64.tar.gz"
+      BINARY_NAME="odbc_bindings_linuxarm.node"
     elif [[ "$arch" == "s390x" ]]; then
       ARCHIVE_PATTERN="linux-s390x.tar.gz"
       BINARY_NAME="odbc_bindings_zlinux.node"
